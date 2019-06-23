@@ -5,7 +5,7 @@
 // Date: 2018-03-10
 
 // This will return an ArrayBuffer with `addTwo.wasm` binary contents
-const bytecode = require('addTwo');
+const bytecode = require('iterate');
 
 const wasmModule = new WebAssembly.Module(bytecode);
 
@@ -22,4 +22,4 @@ imports.env = {
 
 const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
 
-console.log(wasmInstance.exports._addTwo(2,3));
+console.log(wasmInstance.exports._iterate());

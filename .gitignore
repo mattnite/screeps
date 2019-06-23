@@ -1,3 +1,4 @@
 build
-./Gruntfile.js
+Gruntfile.js
 node_modules
+dist
