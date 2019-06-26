@@ -17,9 +17,9 @@ int main(int argc, char* argv[]) {
     cxxopts::Options options("pathfind", "finds paths");
     options.add_options()
         ("t,terrain", "terrain file to use",
-                      cxxopts::value<std::filesystem::path>(&terrainPath))
+                       cxxopts::value<std::filesystem::path>(&terrainPath))
         ("a,agents", "number of agents to find paths for",
-                     cxxopts::value<int>(&agentNum));
+                      cxxopts::value<int>(&agentNum));
 
     options.parse(argc, argv);
 }
