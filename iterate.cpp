@@ -9,9 +9,12 @@
 #include <emscripten/bind.h>
 
 #include <iostream>
+#include <vector>
 
 void iterate() {
-    std::cout << "hello world" << std::endl;
+    emscripten::val memory = emscripten::val::global("RawMemory");
+    auto buf = memory.call<std::string>("get");
+    std::cout << buf.size() << std::endl;
 }
 
 EMSCRIPTEN_BINDINGS(iterate) {

@@ -1,0 +1,7 @@
+[requires]
+[generators]
+virtualenv
+[imports]
+bin, *.html -> ./bin
+bin, *.wasm -> ./bin
+bin, *.js -> ./bin

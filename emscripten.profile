@@ -1,0 +1,9 @@
+include(default)
+[settings]
+os=Emscripten
+arch=wasm
+[options]
+[build_requires]
+emsdk_installer/1.38.29@bincrafters/stable
+ninja_installer/1.8.2@bincrafters/stable
+[env]
