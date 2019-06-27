@@ -5,7 +5,9 @@
 // Date: 2019-06-26
 
 #include "a.hpp"
+#include "display.hpp"
 
+#include <ncurses.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -16,77 +18,78 @@
 const std::size_t length = 50;
 
 int usage() {
-	std::cerr << "pathfind -a NUM -t TERRAIN" << std::endl;
-	return 1;
+    std::cerr << "pathfind -a NUM -t TERRAIN" << std::endl;
+    return 1;
 }
 
 int main(int argc, char* argv[]) {
-	int opt;
-	
-	// initialize command line arguments with defaults
-	std::size_t agentNum;
-	std::array<std::array<char, length>, length> terrain;
+    int opt;
 
-	try {
-		std::filesystem::path terrainPath;
-		
-		// parse arguments
-		std::vector<std::string> arguments(argv + 1, argv + argc);
-		auto it = std::find(arguments.cbegin(), arguments.cend(), "-a");
-		if (it == arguments.cend() || std::next(it) == arguments.cend()) {
-			std::cerr << "Need to specify number of agents" << std::endl;
-			return usage();
-		}
-		
-		agentNum = std::stoi(*++it);
-		if (agentNum < 1) {
-			std::cerr << "Need to be one or more agents" << std::endl;
-			return 1;
-		}
+    // initialize command line arguments with defaults
+    std::size_t agentNum;
+    Frame<length, length> terrain;
 
-		it = std::find(arguments.cbegin(), arguments.cend(), "-t");
-		if (it == arguments.cend() || std::next(it) == arguments.cend()) {
-			std::cerr << "Need to specify terrain file" << std::endl;
-			return usage();
-		}
+    try {
+        std::filesystem::path terrainPath;
 
-		terrainPath = *++it;
+        // parse arguments
+        std::vector<std::string> arguments(argv + 1, argv + argc);
+        auto it = std::find(arguments.cbegin(), arguments.cend(), "-a");
+        if (it == arguments.cend() || std::next(it) == arguments.cend()) {
+            std::cerr << "Need to specify number of agents" << std::endl;
+            return usage();
+        }
 
-		if (!std::filesystem::exists(terrainPath)) {
-			std::cerr << "Terrain file does not exist" << std::endl;
-			return 1;
-		}
+        agentNum = std::stoi(*++it);
+        if (agentNum < 1) {
+            std::cerr << "Need to be one or more agents" << std::endl;
+            return 1;
+        }
 
-		try {
-			// open terrain and parse file
-			std::vector<char> buf(length + 1);
-			std::ifstream terrainFile(terrainPath);
-			for (std::size_t i = 0; i < length; i++) {
-				terrainFile.getline(buf.data(), buf.size());
-				if (terrainFile.gcount() != length + 1)
-					throw std::runtime_error("Invalid terrain dimensions");
+        it = std::find(arguments.cbegin(), arguments.cend(), "-t");
+        if (it == arguments.cend() || std::next(it) == arguments.cend()) {
+            std::cerr << "Need to specify terrain file" << std::endl;
+            return usage();
+        }
 
-				for (std::size_t j = 0; j < length; j++)
-					terrain[j][i] = buf[j];
-			}
-		} catch (std::exception const& e) {
-			std::cerr << "Error parsing terrain file:" << std::endl;
-			std::cerr << e.what() << std::endl;
-			return 1;
-		}
-	} catch (std::exception const& e) {
-		std::cerr << "Error parsing arguments:" << std::endl;
-		std::cerr << e.what() << std::endl;
-		return usage();
-	}
+        terrainPath = *++it;
 
-	std::cout << "Successfully parsed arguments" << std::endl;
-	std::cout << "Terrain:" << std::endl << std::endl;
+        if (!std::filesystem::exists(terrainPath)) {
+            std::cerr << "Terrain file does not exist" << std::endl;
+            return 1;
+        }
 
-	for (auto& row : terrain) {
-		for (auto& col : row)
-			std::cout << col;
+        try {
+            // open terrain and parse file
+            std::vector<char> buf(length + 1);
+            std::ifstream terrainFile(terrainPath);
+            for (std::size_t row = 0; row < length; row++) {
+                terrainFile.getline(buf.data(), buf.size());
+                if (terrainFile.gcount() != length + 1)
+                    throw std::runtime_error("Invalid terrain dimensions");
 
-		std::cout << std::endl;
-	}
+                for (std::size_t col = 0; col < length; col++)
+                    terrain[row][col] = buf[col];
+            }
+        } catch (std::exception const& e) {
+            std::cerr << "Error parsing terrain file:" << std::endl;
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+    } catch (std::exception const& e) {
+        std::cerr << "Error parsing arguments:" << std::endl;
+        std::cerr << e.what() << std::endl;
+        return usage();
+    }
+
+    // initialize ncurses
+    Display<length, length> display;
+
+    Frame<length, length> buf;
+    std::copy(terrain.begin(), terrain.end(), buf.begin());
+    buf[5][8] = 'A';
+
+    display.update(buf);
+    getch();
+
 }
