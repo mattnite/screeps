@@ -1,5 +1,0 @@
-[requires]
-ncurses/6.1@conan/stable
-
-[generators]
-cmake
