@@ -10,7 +10,7 @@ class Screeps(ConanFile):
     url = "https://github.com/conan-io/examples"
     homepage = "https://github.com/conan-io/examples"
     settings = {"os": ["Emscripten"]}
-    generators = ["cmake"]
+    generators = ["virtualenv", "cmake"]
 
     def _configure_cmake(self):
         cmake = CMake(self)

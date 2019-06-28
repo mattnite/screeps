@@ -23,9 +23,6 @@ int charToColorPair(char elem) {
 }
 
 template <auto height, auto width>
-using Frame = std::array<std::array<char, height>, width>;
-
-template <auto height, auto width>
 class Display {
     void colorize(char elem) {
         attron(COLOR_PAIR(charToColorPair(elem)));
