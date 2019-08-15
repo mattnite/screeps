@@ -7,14 +7,17 @@
 #include "a.hpp"
 #include "display.hpp"
 #include "agent-factory.hpp"
+#include "pathfinder.hpp"
 
 #include <ncurses.h>
 #include <unistd.h>
 
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <thread>
 
 const std::size_t length = 50;
 
@@ -26,6 +29,7 @@ int usage() {
 int main(int argc, char* argv[]) {
     Frame<length, length> terrain;
 	std::vector<Agent> agents;
+	std::chrono::milliseconds tickPeriod(1000);
 
     try {
         std::filesystem::path terrainPath;
@@ -85,11 +89,35 @@ int main(int argc, char* argv[]) {
 
     // initialize ncurses
     Display<length, length> display;
+	Pathfinder<void> pathfinder;
 
-    Frame<length, length> buf;
-    std::copy(terrain.begin(), terrain.end(), buf.begin());
-    buf[5][8] = 'A';
+	std::size_t collisions = 0;
 
-    display.update(buf);
-    getch();
+	for (std::size_t i = 0; i < 100; i++) {
+		Frame<length, length> frame;
+		std::copy(terrain.begin(), terrain.end(), frame.begin());
+		for (auto& agent : agents) {
+			frame[agent.goal.first][agent.goal.second] = agent.name - 32;
+			frame[agent.pos.first][agent.pos.second] = agent.name;
+		}
+
+		display.update(frame);
+		// run algo	
+		pathfinder.process(terrain, agents);
+		std::this_thread::sleep_for(tickPeriod);
+		
+		// move everyone around
+		for (auto& agent : agents) {
+			if (!agent.path.empty()) {
+				if (std::none_of(agents.cbegin(), agents.cend(), [&](auto& other) { return other.pos == agent.path.front(); })) {
+					agent.pos = agent.path.front();
+					agent.path.pop();
+				} else {
+					collisions++;
+				}
+			}
+		}
+	}
+
+	std::cout << "collisions: " << collisions << std::endl;
 }

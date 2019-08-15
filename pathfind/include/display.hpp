@@ -19,11 +19,13 @@ int charToColorPair(char elem) {
         case '3': return 4;
     }
 
-    return 0;
+    return 5;
 }
 
 template <auto height, auto width>
 class Display {
+	std::size_t tick;
+
     void colorize(char elem) {
         attron(COLOR_PAIR(charToColorPair(elem)));
         addch(elem);
@@ -44,6 +46,7 @@ class Display {
         init_pair(charToColorPair('1'), COLOR_WHITE, COLOR_WHITE);
         init_pair(charToColorPair('2'), COLOR_GREEN, COLOR_GREEN);
         init_pair(charToColorPair('3'), COLOR_YELLOW, COLOR_YELLOW);
+        init_pair(5, COLOR_CYAN, COLOR_BLACK);
     }
 
     void update(Frame<height, width> const& frame) {
@@ -56,7 +59,10 @@ class Display {
             addch('\n');
         }
 
-        refresh(); }
+		addch('\n');
+		printw("tick: %d", tick++);
+        refresh();
+	}
 
     ~Display() { endwin(); }
 };
